@@ -1,12 +1,26 @@
 import java.io.IOException;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static org.lwjgl.opengl.GL46C.*;
 
 public class ShaderProgram {
+
+    private class Uniform{
+        String name;
+        int location;
+        Uniform(String name){
+            this.name = name;
+            this.location = glGetUniformLocation(ShaderProgram.this.id, name);
+        }
+    }
+
     final int id;
+    HashMap<String, Uniform> uniforms;
 
     public ShaderProgram(String... paths) throws IOException {
         id = glCreateProgram();
@@ -18,8 +32,9 @@ public class ShaderProgram {
         int[] success = new int[1];
         glGetProgramiv(id, GL_LINK_STATUS, success);
         if(success[0] != GL_TRUE){
-            throw new RuntimeException("Program linking failed for:" + Arrays.toString(paths));
+            throw new RuntimeException("Program linking failed for" + Arrays.toString(paths) + ": " + glGetProgramInfoLog(id));
         }
+        uniforms = new HashMap<>();
     }
 
     private static int getShader(String path) throws IOException {
@@ -60,4 +75,54 @@ public class ShaderProgram {
         glUseProgram(id);
     }
 
+    private void addUniformIfAbsent(String name){
+        if(!uniforms.containsKey(name)){
+            uniforms.put(name, new Uniform(name));
+        }
+    }
+
+    public void setUniform1(String name, FloatBuffer value){
+        addUniformIfAbsent(name);
+        glProgramUniform1fv(id, uniforms.get(name).location, value);
+    }
+
+    public void setUniform2(String name, FloatBuffer value){
+        addUniformIfAbsent(name);
+        glProgramUniform2fv(id, uniforms.get(name).location, value);
+    }
+
+    public void setUniform3(String name, FloatBuffer value){
+        addUniformIfAbsent(name);
+        glProgramUniform3fv(id, uniforms.get(name).location, value);
+    }
+
+    public void setUniform4(String name, FloatBuffer value){
+        addUniformIfAbsent(name);
+        glProgramUniform4fv(id, uniforms.get(name).location, value);
+    }
+
+    public void setUniform1(String name, IntBuffer value){
+        addUniformIfAbsent(name);
+        glProgramUniform1iv(id, uniforms.get(name).location, value);
+    }
+
+    public void setUniform2(String name, IntBuffer value){
+        addUniformIfAbsent(name);
+        glProgramUniform2iv(id, uniforms.get(name).location, value);
+    }
+
+    public void setUniform3(String name, IntBuffer value){
+        addUniformIfAbsent(name);
+        glProgramUniform3iv(id, uniforms.get(name).location, value);
+    }
+
+    public void setUniform4(String name, IntBuffer value){
+        addUniformIfAbsent(name);
+        glProgramUniform4iv(id, uniforms.get(name).location, value);
+    }
+
+    public void setUniformMatrix4(String name, FloatBuffer value, boolean transpose){
+        addUniformIfAbsent(name);
+        glProgramUniformMatrix4fv(id, uniforms.get(name).location, transpose, value);
+    }
 }
