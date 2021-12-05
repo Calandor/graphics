@@ -31,6 +31,7 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
     implementation "org.joml:joml:$jomlVersion"
+    runtimeOnly fileTree(dir: 'libraries', include: '*.jar')
 
 }
 
